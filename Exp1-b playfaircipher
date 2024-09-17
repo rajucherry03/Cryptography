@@ -1,0 +1,42 @@
+
+
+def prepare_text(text):
+    text = text.upper().replace("J", "I").replace(" ", "")
+    return text if len(text) % 2 == 0 else text + "X"
+
+def create_matrix(key):
+    key = key.upper().replace("J", "I")
+    matrix = []
+    for char in key + "ABCDEFGHIKLMNOPQRSTUVWXYZ":
+        if char not in matrix:
+            matrix.append(char)
+    return [matrix[i:i+5] for i in range(0, 25, 5)]
+
+def find_position(matrix, char):
+    for row in matrix:
+        if char in row:
+            return matrix.index(row), row.index(char)
+
+def encrypt(plain_text, key):
+    matrix = create_matrix(key)
+    plain_text = prepare_text(plain_text)
+    cipher_text = ""
+
+    for i in range(0, len(plain_text), 2):
+        row1, col1 = find_position(matrix, plain_text[i])
+        row2, col2 = find_position(matrix, plain_text[i+1])
+
+        if row1 == row2:
+            cipher_text += matrix[row1][(col1+1)%5] + matrix[row2][(col2+1)%5]
+        elif col1 == col2:
+            cipher_text += matrix[(row1+1)%5][col1] + matrix[(row2+1)%5][col2]
+        else:
+            cipher_text += matrix[row1][col2] + matrix[row2][col1]
+
+    return cipher_text
+
+# Input and Output
+key = input("Enter the key: ")
+plain_text = input("Enter the plaintext: ")
+
+print("Encrypted text:", encrypt(plain_text, key))
