@@ -1,0 +1,127 @@
+#Rivest-Shamir-Adelman  3-1 RSA
+import math
+p=3
+q=7
+n=p*q
+e=2
+phi=(p-1)*(q-1)
+while(e<phi):
+  if math.gcd(e,phi)==1:
+    break
+  else:
+    e+=1
+k=2
+d=(1+(k*phi))/e
+msg=12.0
+print("Message data:",msg)
+c=pow(msg,e)
+c=math.fmod(c,n)
+print("Encrypted data:",c)
+m=pow(c,d)
+m=math.fmod(m,n)
+print("Original message sent:",m)
+
+
+
+
+
+
+
+#Diffie-Hellman 3-2
+import random
+p=23
+q=5
+def compute_public_key(private_key):
+  return (q**private_key)%p
+private_key_a=random.randint(1,p-1)
+private_key_b=random.randint(1,p-1)
+public_key_a=compute_public_key(private_key_a)
+public_key_b=compute_public_key(private_key_b)
+shared_secret_a=(public_key_b**private_key_a)%p
+shared_secret_b=(public_key_a**private_key_b)%p
+print(shared_secret_a)
+print(shared_secret_b)
+
+
+
+
+
+
+
+# RC4   4-1
+def rc4(key, plaintext):
+    S, j = list(range(256)), 0
+    for i in range(256):
+        j = (j + S[i] + key[i % len(key)]) % 256
+        S[i], S[j] = S[j], S[i]
+    i = j = 0
+    return ''.join(chr(ord(c) ^ S[(S[i := (i + 1) % 256] + S[j := (j + S[i]) % 256]) % 256]) for c in plaintext)
+
+key = [1, 2, 3, 4]
+text = "Hello"
+cipher = rc4(key, text)
+print("Ciphertext:", cipher)
+print("Decrypted:", rc4(key, cipher))
+
+
+
+
+
+
+
+
+# sha3 4-2
+import hashlib
+def sha3_hash(msg, size=256):
+    return hashlib.new(f'sha3_{size}', msg.encode()).hexdigest()
+# Example usage
+message = "Hello, SHA-3!"
+print("SHA-3-256 Hash:", sha3_hash(message, 256))
+print("SHA-3-512 Hash:", sha3_hash(message, 512))
+
+
+
+
+
+
+
+# HMAC 4-2
+import hmac
+import hashlib
+def hmac_sha256(key, message):
+    return hmac.new(key.encode(), message.encode(), hashlib.sha256).hexdigest()
+key = 'secretkey'
+message = 'Hello, HMAC!'
+print("HMAC:", hmac_sha256(key, message))
+
+
+
+
+
+
+
+# Signature Scheme
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dsa
+from cryptography.hazmat.backends import default_backend
+def generate_dsa_key():
+  private_key=dsa.generate_private_key(key_size=1024,backend=default_backend)
+  public_key=private_key.public_key()
+  return private_key,public_key
+def sign_message(private_key,message):
+  signature=private_key.sign(message,hashes.SHA256())
+  return signature
+def verify_signature(public_key,signature,message):
+  try:
+    public_key.verify(signature,message,hashes.SHA256())
+    return True
+  except dsa.InvalidSignature:
+    return False
+private_key,public_key=generate_dsa_key()
+message=b"Hello,DSA!"
+signature=sign_message(private_key,message)
+verification_result=verify_signature(public_key,signature,message)
+print("Message:",message.decode('utf-8'))
+print("Signature:",signature)
+print("Verification Result:", verification_result)
+
